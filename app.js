@@ -31,12 +31,10 @@ const testData = {
 // Create Dino Objects
 const createDinos = async() =>{
     let dinos = await getDinoData();
-    console.log(dinos)
     dinos.forEach(i => console.log(i))
     return dinos.map((e)=> new Dinos(e))
 }
 
-createDinos().then((data)=> console.log(data));
 // Create Human Object
 
 // Use IIFE to get human data from form
