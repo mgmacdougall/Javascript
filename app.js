@@ -19,7 +19,7 @@ function Human(data) {
 }
 
 // Use IIFE to get human data from form/revealing module pattern.
-const buildHuman = (data) =>
+const buildHuman = async (data) =>
   (function (info) {
     let human = new Human(info);
 
@@ -30,21 +30,9 @@ const buildHuman = (data) =>
     };
   })(data);
 
-button.addEventListener("click", () => {
-  // Get the values out of the form
-  const data = {
-    name: name.value,
-    feet: feet.value,
-    inches: inches.value,
-    weight: weight.value,
-    diet: diet.value,
-  };
-  buildHuman(data)
-});
-
-const getDinoData = async () => {
-  const fetchedData = await fetch("./dino.json");
-  const data = await fetchedData.json();
+  const getDinoData = async () => {
+    const fetchedData = await fetch("./dino.json");
+    const data = await fetchedData.json();
   return data.Dinos;
 };
 
@@ -60,34 +48,65 @@ function Dinos(dino) {
   this.fact = fact;
 }
 
-// Test Code
-const testData = {
-  species: "Triceratops",
-  weight: 13000,
-  height: 114,
-  diet: "herbavor",
-  where: "North America",
-  when: "Late Cretaceous",
-  fact: "First discovered in 1889 by Othniel Charles Marsh",
-};
 
 // Create Dino Objects
 const createDinos = async () => {
   let dinos = await getDinoData();
-  dinos.forEach((i) => console.log(i));
   return dinos.map((e) => new Dinos(e));
 };
 
-
-
 // Create Dino Compare Method 1
 // NOTE: Weight in JSON file is in lbs, height in inches.
+const compareHeight = (human, dino)=>{
+  return new Promise((resolve, reject)=>{
+    try{
+      const humanHeight = `${(parseInt(human.feet)*12)+(parseInt(human.inches))}`
+      const dinoHeight = parseInt(dino.height);
+      resolve(`The ${dino.species} is ${dinoHeight - humanHeight} inches taller than you`)
+
+    }catch(error){
+      reject(error)
+    }
+  })
+
+}
 
 // Create Dino Compare Method 2
 // NOTE: Weight in JSON file is in lbs, height in inches.
+const compareWeight = (human, dino)=>{
+  return new Promise((resolve, reject)=>{
+    try{
+      const humanWeight = `${parseInt(human.weight)}`;
+      const dinoWeight = `${parseInt(dino.weight)}`
+      resolve(`The ${dino.species} is ${dinoWeight - humanWeight} lbs heavier than you!!!`)
 
+    }catch(error){
+      reject(error)
+    }
+  })
+
+
+
+}
 // Create Dino Compare Method 3
 // NOTE: Weight in JSON file is in lbs, height in inches.
+const compareDiet = (human, dino) =>{
+  return new Promise((resolve, reject)=>{
+    try{
+      let comparison = '';
+
+      if(human.diet.toLowerCase() === dino.diet.toLowerCase()){
+        comparison = `Wow you both are both ${human.diet}s`
+      }else{
+        comparison = `${dino.species} are ${dino.diet}s`
+      }
+      resolve(comparison)
+
+    }catch(error){
+      reject(error)
+    }
+  })
+}
 
 // Generate Tiles for each Dino in Array
 
@@ -96,3 +115,49 @@ const createDinos = async () => {
 // Remove form from screen
 
 // On button click, prepare and display infographic
+
+const getRandomDino = (dinosaurs)=>{
+
+
+  let r =  Math.floor(Math.random()*dinosaurs.length)
+  // console.log(r)
+  return r;
+}
+
+
+
+button.addEventListener("click", async () => {
+  // Get the values out of the form -- move this??? seperate function
+    const data = {
+      name: name.value,
+      feet: feet.value,
+      inches: inches.value,
+      weight: weight.value,
+      diet: diet.value
+    };
+
+    const human = await buildHuman(data);
+    let theHuman = await human.getHuman();
+    const dinos = await createDinos()
+    
+      const d1 = dinos[getRandomDino(dinos)]
+      console.log(d1)
+      dinos.splice(d1, 1)
+
+      const d2 = dinos[getRandomDino(dinos)]
+      dinos.splice(d2,1)
+      console.log(d2)
+
+      const d3 =  dinos[getRandomDino(dinos)]
+      dinos.splice(d3,1)
+      console.log(d3)
+
+    // Call comparisons
+    const test = await compareHeight(theHuman, d1)
+    const weightTest = await compareWeight(theHuman, d2)
+    const test2 = await compareDiet(theHuman, d3)
+    console.log(test, weightTest, test2)
+
+    // Now hide the form.
+
+});
