@@ -10,8 +10,16 @@ const diet = document.getElementById("diet");
 // Helper function - ImagePath(obj) // returns a path to the image
 // used when creating all the objects
 imagePath = (itemName) => {
-  return `./images/${itemName}`;
+  return `./images/${itemName.toLowerCase()}.png`;
 };
+// Builds the facts details
+const buildFacts = async(data,human)=>{
+      for (let c of data) {
+        if (c.fact instanceof Function) {
+          c.fact = await c.fact(human, c);
+        } 
+      }
+}
 
 // Create Human Object
 function Human(data) {
@@ -21,7 +29,7 @@ function Human(data) {
   this.inches = inches;
   this.weight = weight;
   this.diet = diet;
-  this.image = imagePath(this.name);
+  this.image = imagePath('human');
 }
 
 // Use IIFE to get human data from form/revealing module pattern.
@@ -146,17 +154,61 @@ const compareDiet = (human, dino) => {
 
 const grid = document.getElementById('grid')
 // Generate Tiles for each Dino in dinosaursay
-const buildTiles =() =>{
+const buildTiles = (info) =>{
 
   // Add tiles to DOM
   let tile =document.createElement('div');
   tile.classList.add('grid-item')
   let image = document.createElement('img');
-  image.src = './images/tracks.png';
+  image.src = `${info.image}`;
   tile.appendChild(image)
   grid.appendChild(tile);
 }
 
+
+const buildGrid =async(test)=>{
+
+  // init a 9 element array 3*3 - need to be place items in correct order
+  let grid = new Array(9) 
+
+  // Add human at idx 5
+  let theHuman = await test.getHuman();
+  grid[4]= theHuman;
+
+  // Add the pigeon at id 9
+  const thePigeon = await createPigeon();
+  // let pigeonFact = pigeon.fact;
+  
+  /// This Code actually used to build the tiles for the dinos.
+  const dinos = await createDinos();
+  let resultFacts = randomDinoFact(dinos);
+
+  await buildFacts(resultFacts, theHuman) // executes the function for the facts
+  
+  // Place Objects in correct cell in the grid.
+  // Assign directly to avoid loop.  Faster insert.
+  grid[0]= resultFacts[0] 
+  grid[1]= resultFacts[1] 
+  grid[2]= resultFacts[2] 
+  grid[3]= resultFacts[3] 
+  grid[4]= theHuman;
+  grid[5]=resultFacts[4]
+  grid[6]=resultFacts[5]
+  grid[7]=resultFacts[6]
+  grid[8]=thePigeon[0];
+
+
+  let i=0;
+  while(i<=grid.length){
+    console.log(grid[i])
+    buildTiles(grid[i]);
+    i++
+  }
+
+
+
+
+}
 
 // Remove form from screen
 const form = document.getElementById('dino-compare')
@@ -193,31 +245,9 @@ button.addEventListener("click", async () => {
     diet: diet.value,
   };
   hideForm();
-  const human = await buildHuman(data);
-  let theHuman = await human.getHuman();
-
-  const pigeon = await createPigeon();
-  let pigeonFact = pigeon.fact;
+ const theHuman = await buildHuman(data);
   
-  /// This Code actually used to build the tiles for the dinos.
-  const dinos = await createDinos();
-  let resultFacts = randomDinoFact(dinos);
-
-
-  for (let c of resultFacts) {
-    if (c.fact instanceof Function) {
-      let r = await c.fact(theHuman, c);
-      console.log(r);
-    } else {
-      console.log(c.fact);
-    }
-  }
-
-  let i=0;
-  while(i<=9){
-    buildTiles();
-    i++
-  }
+  buildGrid(theHuman)
 
 
   // Call comparisons
