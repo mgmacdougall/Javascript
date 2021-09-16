@@ -144,12 +144,25 @@ const compareDiet = (human, dino) => {
   });
 };
 
+const grid = document.getElementById('grid')
 // Generate Tiles for each Dino in dinosaursay
+const buildTiles =() =>{
 
-// Add tiles to DOM
+  // Add tiles to DOM
+  let tile =document.createElement('div');
+  tile.classList.add('grid-item')
+  let image = document.createElement('img');
+  image.src = './images/tracks.png';
+  tile.appendChild(image)
+  grid.appendChild(tile);
+}
+
 
 // Remove form from screen
-
+const form = document.getElementById('dino-compare')
+const hideForm =()=>{
+  form.remove();
+}
 // On button click, prepare and display infographic
 
 // Create Random fact for 3 dinos 
@@ -179,13 +192,17 @@ button.addEventListener("click", async () => {
     weight: weight.value,
     diet: diet.value,
   };
-
+  hideForm();
   const human = await buildHuman(data);
   let theHuman = await human.getHuman();
 
+  const pigeon = await createPigeon();
+  let pigeonFact = pigeon.fact;
+  
   /// This Code actually used to build the tiles for the dinos.
   const dinos = await createDinos();
   let resultFacts = randomDinoFact(dinos);
+
 
   for (let c of resultFacts) {
     if (c.fact instanceof Function) {
@@ -196,8 +213,13 @@ button.addEventListener("click", async () => {
     }
   }
 
-  const pigeon = await createPigeon();
-  console.log(pigeon);
+  let i=0;
+  while(i<=9){
+    buildTiles();
+    i++
+  }
+
+
   // Call comparisons
 
   // Now hide the form.
