@@ -13,25 +13,25 @@ imagePath = (itemName) => {
   return `./images/${itemName.toLowerCase()}.png`;
 };
 // Builds the facts details
-const buildFacts = async(data,human)=>{
-      for (let c of data) {
-        if (c.fact instanceof Function) {
-          c.fact = await c.fact(human, c);
-        } 
-      }
-}
+const buildFacts = async (data, human) => {
+  for (let c of data) {
+    if (c.fact instanceof Function) {
+      c.fact = await c.fact(human, c);
+    }
+  }
+};
 
 // Create Human Object
 function Human(data) {
   let { name, feet, inches, weight, diet } = data;
-  this.species="Human"
+  this.species = "Human";
   this.name = name;
   this.feet = feet;
   this.inches = inches;
   this.weight = weight;
   this.diet = diet;
-  this.fact="";
-  this.image = imagePath('human');
+  this.fact = "";
+  this.image = imagePath("human");
 }
 
 // Use IIFE to get human data from form/revealing module pattern.
@@ -154,101 +154,91 @@ const compareDiet = (human, dino) => {
   });
 };
 
-const grid = document.getElementById('grid')
+const grid = document.getElementById("grid");
 // Generate Tiles for each Dino in dinosaursay
-const buildTiles = (info) =>{
-
+const buildTiles = (info) => {
   // Add tiles to DOM
-  let tile =document.createElement('div');
-  tile.classList.add('grid-item')
+  let tile = document.createElement("div");
+  tile.classList.add("grid-item");
 
   // text here
-  let textNode = document.createElement('h3')
-  let text = document.createTextNode(`${info.species}`)
-  textNode.appendChild(text)
+  let textNode = document.createElement("h3");
+  let text = document.createTextNode(`${info.species}`);
+  textNode.appendChild(text);
 
   // Image Here
-  let image = document.createElement('img');
+  let image = document.createElement("img");
   image.src = `${info.image}`;
 
   // Fact here
-  let para = document.createElement('p')
-  
-  let fact = document.createTextNode(`${info.fact}`)
-  para.appendChild(fact)
+  let para = document.createElement("p");
+  let fact = document.createTextNode(`${info.fact}`);
+  para.appendChild(fact);
 
   tile.appendChild(textNode);
-
-  tile.appendChild(image)
-  tile.appendChild(para)
+  tile.appendChild(image);
+  tile.appendChild(para);
   grid.appendChild(tile);
-}
+};
 
-
-const buildGrid =async(test)=>{
-
+const buildGrid = async (test) => {
   // init a 9 element array 3*3 - need to be place items in correct order
-  let grid = new Array(9) 
+  let grid = new Array(9);
 
   // Add human at idx 5
   let theHuman = await test.getHuman();
-  grid[4]= theHuman;
 
   // Add the pigeon at id 9
   const thePigeon = await createPigeon();
-  // let pigeonFact = pigeon.fact;
-  
+
   /// This Code actually used to build the tiles for the dinos.
   const dinos = await createDinos();
   let resultFacts = randomDinoFact(dinos);
 
-  await buildFacts(resultFacts, theHuman) // executes the function for the facts
-  
+  await buildFacts(resultFacts, theHuman); // executes the function for the facts
+
   // Place Objects in correct cell in the grid.
   // Assign directly to avoid loop.  Faster insert.
-  grid[0]= resultFacts[0] 
-  grid[1]= resultFacts[1] 
-  grid[2]= resultFacts[2] 
-  grid[3]= resultFacts[3] 
-  grid[4]= theHuman;
-  grid[5]=resultFacts[4]
-  grid[6]=resultFacts[5]
-  grid[7]=resultFacts[6]
-  grid[8]=thePigeon[0];
+  grid[0] = resultFacts[0];
+  grid[1] = resultFacts[1];
+  grid[2] = resultFacts[2];
+  grid[3] = resultFacts[3];
+  grid[4] = theHuman;
+  grid[5] = resultFacts[4];
+  grid[6] = resultFacts[5];
+  grid[7] = resultFacts[6];
+  grid[8] = thePigeon[0];
 
   // Populate Tiles
-  let i=0;
-  while(i<=grid.length-1){
-    console.log(grid[i])
+  let i = 0;
+  while (i <= grid.length - 1) {
     buildTiles(grid[i]);
-    i++
+    i++;
   }
-
-
-}
+};
 
 // Remove form from screen
-const form = document.getElementById('dino-compare')
-const hideForm =()=>{
+const form = document.getElementById("dino-compare");
+const hideForm = () => {
   form.remove();
-}
+};
 // On button click, prepare and display infographic
 
-// Create Random fact for 3 dinos 
+// Create Random fact for 3 dinos
 const randomDinoFact = (dinosaurs) => {
   let min = 0;
   let count = 0;
   let result = [];
   let methods = [compareDiet, compareHeight, compareWeight];
 
-  while (result.length < methods.length) {
+  while (result.length <3) {
     let t = Math.floor(Math.random() * (dinosaurs.length - min) + min);
     dinosaurs[t].fact = methods[count];
     result.push(dinosaurs[t]);
-    methods.splice(count,1)
     dinosaurs.splice(t, 1);
     count++;
   }
+  console.log(result)
   return dinosaurs.concat(result);
 };
 
@@ -262,12 +252,8 @@ button.addEventListener("click", async () => {
     diet: diet.value,
   };
   hideForm();
- const theHuman = await buildHuman(data);
-  
-  buildGrid(theHuman)
 
+  const theHuman = await buildHuman(data);
 
-  // Call comparisons
-
-  // Now hide the form.
+  buildGrid(theHuman);
 });
