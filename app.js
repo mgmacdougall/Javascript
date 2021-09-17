@@ -24,11 +24,13 @@ const buildFacts = async(data,human)=>{
 // Create Human Object
 function Human(data) {
   let { name, feet, inches, weight, diet } = data;
+  this.species="Human"
   this.name = name;
   this.feet = feet;
   this.inches = inches;
   this.weight = weight;
   this.diet = diet;
+  this.fact="";
   this.image = imagePath('human');
 }
 
@@ -159,9 +161,26 @@ const buildTiles = (info) =>{
   // Add tiles to DOM
   let tile =document.createElement('div');
   tile.classList.add('grid-item')
+
+  // text here
+  let textNode = document.createElement('h3')
+  let text = document.createTextNode(`${info.species}`)
+  textNode.appendChild(text)
+
+  // Image Here
   let image = document.createElement('img');
   image.src = `${info.image}`;
+
+  // Fact here
+  let para = document.createElement('p')
+  
+  let fact = document.createTextNode(`${info.fact}`)
+  para.appendChild(fact)
+
+  tile.appendChild(textNode);
+
   tile.appendChild(image)
+  tile.appendChild(para)
   grid.appendChild(tile);
 }
 
@@ -197,15 +216,13 @@ const buildGrid =async(test)=>{
   grid[7]=resultFacts[6]
   grid[8]=thePigeon[0];
 
-
+  // Populate Tiles
   let i=0;
-  while(i<=grid.length){
+  while(i<=grid.length-1){
     console.log(grid[i])
     buildTiles(grid[i]);
     i++
   }
-
-
 
 
 }
