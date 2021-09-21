@@ -237,7 +237,6 @@ const randomDinoFact = (dinosaurs) => {
     dinosaurs.splice(t, 1);
     count++;
   }
-  console.log(result);
   return dinosaurs.concat(result);
 };
 
