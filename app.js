@@ -1,5 +1,4 @@
-// Get form data
-
+// Get form data DOM elements
 const button = document.getElementById("btn");
 const name = document.getElementById("name");
 const feet = document.getElementById("feet");
@@ -7,12 +6,12 @@ const inches = document.getElementById("inches");
 const weight = document.getElementById("weight");
 const diet = document.getElementById("diet");
 
-// Helper function - ImagePath(obj) // returns a path to the image
-// used when creating all the objects
-imagePath = (itemName) => {
-  return `./images/${itemName.toLowerCase()}.png`;
+// Helper function to create the image path for an item provided
+imagePath = (item) => {
+  return `./images/${item.toLowerCase()}.png`;
 };
-// Builds the facts details
+
+// Builds the fact details for a dino compared to human
 const buildFacts = async (data, human) => {
   for (let c of data) {
     if (c.fact instanceof Function) {
@@ -24,7 +23,7 @@ const buildFacts = async (data, human) => {
 // Create Human Object
 function Human(data) {
   let { name, feet, inches, weight, diet } = data;
-  this.species = "Human";
+  this.species = name;
   this.name = name;
   this.feet = feet;
   this.inches = inches;
@@ -34,7 +33,7 @@ function Human(data) {
   this.image = imagePath("human");
 }
 
-// Use IIFE to get human data from form/revealing module pattern.
+// Use IIFE to get human data from form/revealing module pattern
 const buildHuman = async (data) =>
   (function (info) {
     let human = new Human(info);
@@ -46,6 +45,7 @@ const buildHuman = async (data) =>
     };
   })(data);
 
+// Gets the dino data from external file
 const getDinoData = async () => {
   const fetchedData = await fetch("./dino.json");
   const data = await fetchedData.json();
@@ -68,9 +68,9 @@ function Dinos(dino) {
 // Create Dino Objects
 const createDinos = async () => {
   let dinos = await getDinoData();
-  // filter all the data to get dinos only
+
   let filteredDinos = dinos.filter(
-    (dino) => dino.species.toLowerCase() !== "pigeon"
+    (dino) => dino.species.toLowerCase() !== "pigeon" // ignore the pigeon in data
   );
   return filteredDinos.map((e) => new Dinos(e));
 };
@@ -98,7 +98,6 @@ const createPigeon = async () => {
 };
 
 // Create Dino Compare Method 1
-// NOTE: Weight in JSON file is in lbs, height in inches.
 const compareHeight = (human, dino) => {
   return new Promise((resolve, reject) => {
     try {
@@ -118,7 +117,6 @@ const compareHeight = (human, dino) => {
 };
 
 // Create Dino Compare Method 2
-// NOTE: Weight in JSON file is in lbs, height in inches.
 const compareWeight = (human, dino) => {
   return new Promise((resolve, reject) => {
     try {
@@ -136,16 +134,15 @@ const compareWeight = (human, dino) => {
 };
 
 // Create Dino Compare Method 3
-// NOTE: Weight in JSON file is in lbs, height in inches.
 const compareDiet = (human, dino) => {
   return new Promise((resolve, reject) => {
     try {
       let comparison = "";
 
       if (human.diet.toLowerCase() === dino.diet.toLowerCase()) {
-        comparison = `Wow you both are both ${human.diet}s`;
+        comparison = `Wow you both are both ${human.diet}s!!!!`;
       } else {
-        comparison = `${dino.species} are ${dino.diet}s`;
+        comparison = `${dino.species} are ${dino.diet}s and won't eat you!`;
       }
       resolve(comparison);
     } catch (error) {
@@ -154,14 +151,16 @@ const compareDiet = (human, dino) => {
   });
 };
 
+// Get the grid reference from DOM
 const grid = document.getElementById("grid");
+
 // Generate Tiles for each Dino in dinosaursay
 const buildTiles = (info) => {
   // Add tiles to DOM
   let tile = document.createElement("div");
   tile.classList.add("grid-item");
 
-  // text here
+  // Text here
   let textNode = document.createElement("h3");
   let text = document.createTextNode(`${info.species}`);
   textNode.appendChild(text);
@@ -181,24 +180,24 @@ const buildTiles = (info) => {
   grid.appendChild(tile);
 };
 
-const buildGrid = async (test) => {
-  // init a 9 element array 3*3 - need to be place items in correct order
-  let grid = new Array(9);
+const buildGrid = async (human) => {
+  // Add human at idx 4
+  let theHuman = await human.getHuman();
 
-  // Add human at idx 5
-  let theHuman = await test.getHuman();
-
-  // Add the pigeon at id 9
+  // Add the pigeon at index 8
   const thePigeon = await createPigeon();
 
-  /// This Code actually used to build the tiles for the dinos.
+  // Create the dinos items.
   const dinos = await createDinos();
   let resultFacts = randomDinoFact(dinos);
+  await buildFacts(resultFacts, theHuman);
 
-  await buildFacts(resultFacts, theHuman); // executes the function for the facts
+  // Initialize a 3 * 3 grid.
+  let grid = new Array(9);
 
+  // Populate tiles in grid. Place items by index.
   // Place Objects in correct cell in the grid.
-  // Assign directly to avoid loop.  Faster insert.
+  // Assign directly to avoid loop.  Faster insert!
   grid[0] = resultFacts[0];
   grid[1] = resultFacts[1];
   grid[2] = resultFacts[2];
@@ -209,7 +208,7 @@ const buildGrid = async (test) => {
   grid[7] = resultFacts[6];
   grid[8] = thePigeon[0];
 
-  // Populate Tiles
+  // Build the tiles with the information.
   let i = 0;
   while (i <= grid.length - 1) {
     buildTiles(grid[i]);
@@ -231,14 +230,14 @@ const randomDinoFact = (dinosaurs) => {
   let result = [];
   let methods = [compareDiet, compareHeight, compareWeight];
 
-  while (result.length <3) {
+  while (result.length < 3) {
     let t = Math.floor(Math.random() * (dinosaurs.length - min) + min);
     dinosaurs[t].fact = methods[count];
     result.push(dinosaurs[t]);
     dinosaurs.splice(t, 1);
     count++;
   }
-  console.log(result)
+  console.log(result);
   return dinosaurs.concat(result);
 };
 
