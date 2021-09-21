@@ -7,7 +7,7 @@ const weight = document.getElementById("weight");
 const diet = document.getElementById("diet");
 
 // Helper function to create the image path for an item provided
-imagePath = (item) => {
+const imagePath = (item) => {
   return `./images/${item.toLowerCase()}.png`;
 };
 
